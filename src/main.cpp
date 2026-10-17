@@ -15,10 +15,9 @@ void initialize() {
 	lcd::initialize();
 
 	// rotation reset
-	claw_rotation.reset_position();
+	arm_rotation.reset_position();
 	lift_rotation.reset_position();
 	// piston state
-	claw_piston.set_value(false);
 	intake_pistion_front.set_value(false);
 	intake_piston_back.set_value(false);
 
@@ -64,14 +63,13 @@ void autonomous() {
 	// alliance goal 1
 	chassis.moveToPose(-45, -20, 0, 2000, {.forwards = false});
 	liftTarget = 500;
-	clawTarget = 9000;
+	armTarget = 9000;
 	chassis.waitUntilDone();
 	chassis.tank(-30, -30); // push into goal
 	liftTarget = -1100;
 	delay(1000);
 	chassis.tank(0, 0);
 	delay(500);
-	claw_piston.set_value(true);
 	delay(500);
 	liftTarget = 1000;
 
@@ -80,25 +78,23 @@ void autonomous() {
 	intake.move(127);
 	chassis.moveToPose(-37.7, -14, 83, 2000, {.minSpeed = 70, .earlyExitRange = 4}); // motion chain
 	delay(500);
-	clawTarget = 0;
+	armTarget = 0;
 	liftTarget = 0;
 	chassis.moveToPose(-29.1, -19.7, 137, 1800);
 	chassis.waitUntilDone();
 	intake_piston_back.set_value(true);
 	delay(1500);
-	claw_piston.set_value(false);
 	delay(200);
 
 	// stack up
 	liftTarget = 1900;
-	clawTarget = 9500;
+	armTarget = 9500;
 	delay(200);
 	intake_piston_back.set_value(false);
 	chassis.moveToPose(-46, -22, 90, 2000, {.forwards = false});
-	clawTarget = 9000;
+	armTarget = 9000;
 	chassis.waitUntilDone();
 	chassis.tank(-50, -50);
-	claw_piston.set_value(true);
 	delay(500);
 	chassis.cancelAllMotions();
 
@@ -107,24 +103,22 @@ void autonomous() {
 	chassis.moveToPose(-37.1, -32.9, 188, 1500, {.minSpeed = 70, .earlyExitRange = 4});
 	delay(200);
 	liftTarget = 0;
-	clawTarget = 0;
+	armTarget = 0;
 	chassis.moveToPose(-47, -46.5, 225, 1800);
 	chassis.waitUntilDone();
 	intake_piston_back.set_value(true);
 	delay(1300);
-	claw_piston.set_value(false);
 	delay(300);
 	intake_piston_back.set_value(false);
 
 	liftTarget = 4500;
-	clawTarget = 9000;
+	armTarget = 9000;
 	chassis.turnToPoint(-47, -26, 1500, {.forwards = false});
 	chassis.waitUntilDone();
 	chassis.moveToPose(-47, -26, 180, 2000, {.forwards = false});
 	chassis.waitUntilDone();
 	chassis.tank(-50, -50);
 	delay(200);
-	claw_piston.set_value(true);
 	delay(800);
 
 	// midfield
@@ -166,14 +160,6 @@ void opcontrol() {
 		intake_pistion_front.set_value(!intake1Retract); //flip both variable bc our pistons are flipped
 		intake_piston_back.set_value(!intake2Retract);
 
-		// toggle claw
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) {
-				clawClose = !clawClose;
-		}
-		if (!scoring) {
-			claw_piston.set_value(!clawClose); //claw piston is flipped so i flipped the clawClose as well
-		}
-
 		// manual toggle
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)) {
 			manual = !manual;
@@ -189,12 +175,12 @@ void opcontrol() {
 				lift.move(0);
 			}
 			if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)) {
-				clawLower = !clawLower;
+				armLower = !armLower;
 			}
-			if (clawLower) {
-				claw.move((9000 - claw_rotation.get_position()) * 0.01);
+			if (armLower) {
+				arm.move((9000 - arm_rotation.get_position()) * 0.01);
 			} else {
-				claw.move((7000 - claw_rotation.get_position()) * 0.01);
+				arm.move((7000 - arm_rotation.get_position()) * 0.01);
 			}
 		} else {
 			if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)) {
@@ -213,8 +199,7 @@ void opcontrol() {
 		// load & score
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) {
 			if (level == 0) {
-				clawClose = false;
-				claw_piston.set_value(clawClose);
+				armIn = true;
 			} else {
 				scoring = !scoring;
 				if (scoring) {
