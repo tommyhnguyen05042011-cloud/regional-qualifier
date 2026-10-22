@@ -52,7 +52,7 @@ inline void macro_lift() {
                 liftTarget = 24000;
             } else if (level == 2) {
                 arm.set_value(true);
-                liftTarget = 50000;
+                liftTarget = 45000;
             } else if (level == 3) {
                 arm.set_value(true);
                 liftTarget = 70000;
@@ -80,10 +80,10 @@ inline void lift_auto() {
 inline void score_stack() {
     if (level != 0) {
         claw.move(-127);
-        pros::delay(200);
-        lift.move_relative(1000, 90);
-        pros::delay(1000);
-        lift.move_relative(-1000, 90);
+        pros::delay(800);
+        lift.move_relative(200, 90);
+        pros::delay(500);
+        lift.move_relative(-200, 90);
         scoring = false;
     }
 }
