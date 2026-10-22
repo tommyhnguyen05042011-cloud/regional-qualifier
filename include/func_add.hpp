@@ -58,7 +58,7 @@ inline void macro_lift() {
                 liftTarget = 70000;
             } else if (level == 4) {
                 arm.set_value(true);
-                liftTarget = 90000;
+                liftTarget = 92000;
             }
             
             liftError = liftTarget - lift_rotation.get_position();
@@ -74,8 +74,12 @@ inline void macro_lift() {
 
 inline void lift_auto() {
     while (true) {
-        liftError = liftTarget - lift_rotation.get_position()/100;
-        lift.move(liftError * liftkP);
+        liftError = liftTarget - lift_rotation.get_position();
+        if (liftError * liftkP < -80) {
+            lift.move(-80);
+        } else {
+            lift.move(liftError * liftkP);
+        }
         pros::delay(20);
     }
 }
