@@ -175,13 +175,9 @@ void opcontrol() {
 
 		// claw control
 		if (master.get_digital(E_CONTROLLER_DIGITAL_R1)) {
-			claw.move(127);
-		} else if (master.get_digital(E_CONTROLLER_DIGITAL_R2)) {
 			claw.move(-127);
-		} else if (loading) {
-			claw.move(127);
 		} else {
-			claw.move(0);
+			claw.move(127);
 		}
 
 		// manual toggle
