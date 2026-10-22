@@ -218,16 +218,6 @@ void opcontrol() {
 									   and this will control it instead*/ 
 		}
 
-		// score
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) {
-			if (level != 0) {
-				scoring = !scoring;
-				if (scoring) {
-					Task scoring_task(score_stack); // only summon scoring task ONCE if scoring is true
-				}
-			} else {}
-		}
-
 		//reseting lift
 		if (master.get_digital(E_CONTROLLER_DIGITAL_UP)) {
 			scoring = false;

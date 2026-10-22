@@ -79,15 +79,3 @@ inline void lift_auto() {
         pros::delay(20);
     }
 }
-
-/* scoring command */
-inline void score_stack() {
-    if (level != 0) {
-        claw.move(-127);
-        pros::delay(800);
-        lift.move_relative(200, 90);
-        pros::delay(500);
-        lift.move_relative(-200, 90);
-        scoring = false;
-    }
-}
