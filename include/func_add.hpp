@@ -44,7 +44,7 @@ inline void macro_intake() {
 inline void macro_lift() {
 	while (true) {
         if (!scoring && !manual) {
-            if (level > 0) {
+            if (level == 0) {
                 liftTarget = -200;
             } else if (level == 1) {
                 arm.set_value(true);
@@ -55,6 +55,9 @@ inline void macro_lift() {
             } else if (level == 3) {
                 arm.set_value(true);
                 liftTarget = 70000;
+            } else if (level == 4) {
+                arm.set_value(true);
+                liftTarget = 90000;
             }
             
             liftError = liftTarget - lift_rotation.get_position();
