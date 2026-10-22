@@ -20,6 +20,7 @@ void initialize() {
 	// piston state
 	intake_pistion_front.set_value(false);
 	intake_piston_back.set_value(false);
+	arm.set_value(false);
 
 	lift.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 
@@ -32,13 +33,12 @@ void initialize() {
 			lcd::print(0, "X: %.3f", chassis.getPose().x);
             lcd::print(1, "Y: %.3f", chassis.getPose().y);
             lcd::print(2, "Theta: %.3f", chassis.getPose().theta);
-
-			lcd::print(3, "Lift Rotation: %d", lift_rotation.get_position());
-
-			lcd::print(4, "Left Drive Temp: %d", left_motor_group.get_temperature());
-			lcd::print(5, "Right Drive Temp: %d", right_motor_group.get_temperature());
-
+			
 			lcd::print(6, "Lift Error: %d", liftError);
+			lcd::print(4, "Lift Rotation: %d", lift_rotation.get_position());
+
+			lcd::print(5, "Left Drive Temp: %d", left_motor_group.get_temperature());
+			lcd::print(6, "Right Drive Temp: %d", right_motor_group.get_temperature());
 
 			delay(200);
     	}
@@ -137,10 +137,12 @@ void autonomous() {
 Controller master(E_CONTROLLER_MASTER);
 
 void opcontrol() {
+
 	Task macro_lift_task(macro_lift);
 	Task macro_intake_task(macro_intake);
 	manual = false;
 	while (true) {
+
 		// get left y and right x positions
         int leftY = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
@@ -157,6 +159,14 @@ void opcontrol() {
 			intake.move(0);
 		}
 
+		// intake pneumatics control
+		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)) {
+			intake1Retract = !intake1Retract;
+			intake2Retract = !intake2Retract;
+		}
+		intake_pistion_front.set_value(!intake1Retract); //flip both variable bc our pistons are flipped
+		intake_piston_back.set_value(!intake2Retract);
+
 		// claw control
 		if (master.get_digital(E_CONTROLLER_DIGITAL_R1)) {
 			claw.move(127);
@@ -165,14 +175,6 @@ void opcontrol() {
 		} else {
 			claw.move(0);
 		}
-
-		// intake pneumatics control
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)) {
-			intake1Retract = !intake1Retract;
-			intake2Retract = !intake2Retract;
-		}
-		intake_pistion_front.set_value(!intake1Retract); //flip both variable bc our pistons are flipped
-		intake_piston_back.set_value(!intake2Retract);
 
 		// manual toggle
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)) {
@@ -189,14 +191,6 @@ void opcontrol() {
 				lift.move(0);
 				lift.brake();
 			}
-			if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)) {
-				armLower = !armLower;
-			}
-			if (armLower) {
-				arm.set_value(false);
-			} else {
-				arm.set_value(true);
-			}
 		} else {
 			if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)) {
 				scoring = false;
@@ -209,6 +203,15 @@ void opcontrol() {
 					level--;
 				}
 			}
+		}
+
+		// arm control at lv0
+		if (level == 0) {
+			if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)) {
+				armLower = !armLower;
+			}
+			arm.set_value(armLower); /*in the macro lift, lv0 does not control the arm
+									   and this will control it instead*/ 
 		}
 
 		// load & score
