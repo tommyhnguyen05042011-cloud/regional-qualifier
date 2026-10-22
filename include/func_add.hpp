@@ -47,8 +47,9 @@ inline void macro_lift() {
             if (level == 0) {
                 liftTarget = -200;
             } else if (level == 1) {
+                loading = false;
                 arm.set_value(true);
-                liftTarget = 26500;
+                liftTarget = 24000;
             } else if (level == 2) {
                 arm.set_value(true);
                 liftTarget = 50000;

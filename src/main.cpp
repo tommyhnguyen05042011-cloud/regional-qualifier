@@ -14,7 +14,7 @@ using namespace lemlib;
 
 void initialize() {
 	lcd::initialize();
-
+	loading = true;
 	// rotation reset
 	lift_rotation.reset_position();
 	// piston state
@@ -178,9 +178,10 @@ void opcontrol() {
 			claw.move(127);
 		} else if (master.get_digital(E_CONTROLLER_DIGITAL_R2)) {
 			claw.move(-127);
-		}
-		if (loading) {
+		} else if (loading) {
 			claw.move(127);
+		} else {
+			claw.move(0);
 		}
 
 		// manual toggle
