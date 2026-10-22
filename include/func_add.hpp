@@ -10,7 +10,7 @@ inline bool loading = true; /* state of arm, loading (taking stacks from intake,
 inline bool scoring = false; /* is robot's next scoring system going to score or not
                                 only happens higher than lv0*/
 
-inline bool manual = true; /* state of control, manual or macroed.
+inline bool manual = false; /* state of control, manual or macroed.
                                when manual, driver will be able
                                to move the lift to whatever degree of movement he needs */
 
@@ -46,17 +46,6 @@ inline void macro_lift() {
 	while (true) {
         if (!scoring && !manual) {
             if (level > 0) {
-                hold_score = armIn;
-            }
-            if (level == 0) {
-                if (!armIn) {
-                    hold_score = false;
-                }
-                if (hold_score && armIn) {
-                    arm.set_value(true);
-                } else {
-                    arm.set_value(false);
-                }
                 liftTarget = -200;
             } else if (level == 1) {
                 arm.set_value(true);
