@@ -49,16 +49,16 @@ inline void macro_lift() {
             } else if (level == 1) {
                 loading = false;
                 arm.set_value(true);
-                liftTarget = 24000;
+                liftTarget = 26000;
             } else if (level == 2) {
                 arm.set_value(true);
-                liftTarget = 45000;
+                liftTarget = 47000;
             } else if (level == 3) {
                 arm.set_value(true);
-                liftTarget = 70000;
+                liftTarget = 72000;
             } else if (level == 4) {
                 arm.set_value(true);
-                liftTarget = 92000;
+                liftTarget = 94000;
             }
             
             liftError = liftTarget - lift_rotation.get_position();
