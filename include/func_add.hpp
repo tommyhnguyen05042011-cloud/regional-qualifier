@@ -62,7 +62,11 @@ inline void macro_lift() {
             }
             
             liftError = liftTarget - lift_rotation.get_position();
-            lift.move(liftError * liftkP);
+            if (liftError * liftkP < -80) {
+                lift.move(-80);
+            } else {
+                lift.move(liftError * liftkP);
+            }
         }
 		pros::delay(20);
 	}

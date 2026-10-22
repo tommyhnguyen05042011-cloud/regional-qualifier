@@ -190,7 +190,7 @@ void opcontrol() {
 			if (master.get_digital(E_CONTROLLER_DIGITAL_Y)) {
 				lift.move(127);
 			} else if (master.get_digital(E_CONTROLLER_DIGITAL_RIGHT)) {
-				lift.move(-100);
+				lift.move(-80);
 			} else {
 				lift.move(0);
 				lift.brake();
