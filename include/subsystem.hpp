@@ -67,12 +67,11 @@ inline lemlib::Chassis chassis(drivetrain, // drivetrain settings
 
 inline pros::Motor intake(13);
 inline pros::MotorGroup lift({-11, 12});
-inline pros::Motor arm(16);
-inline pros::Motor claw(14);
+inline pros::Motor claw(-15);
 
-inline pros::Rotation arm_rotation(15);
-inline pros::Rotation lift_rotation(-17);
+inline pros::Rotation lift_rotation(17);
 inline pros::Optical optical(8);
 
 inline pros::ADIDigitalOut intake_pistion_front('A');
 inline pros::ADIDigitalOut intake_piston_back('B');
+inline pros::ADIDigitalOut arm('C');

@@ -10,7 +10,7 @@ inline bool loading = true; /* state of arm, loading (taking stacks from intake,
 inline bool scoring = false; /* is robot's next scoring system going to score or not
                                 only happens higher than lv0*/
 
-inline bool manual = false; /* state of control, manual or macroed.
+inline bool manual = true; /* state of control, manual or macroed.
                                when manual, driver will be able
                                to move the lift to whatever degree of movement he needs */
 
@@ -21,11 +21,8 @@ inline bool intake2Retract = true;
 inline bool currentOpticalDetect = false;
 inline bool lastOpticalDetect = false;
 inline int liftTarget;
-inline int armTarget;
 inline int liftError;
-inline int armError;
-inline float liftkP = 0.45;
-inline float armkP = 0.03;
+inline float liftkP = 0.02;
 
 inline void macro_intake() {
     while (true) {
@@ -56,25 +53,23 @@ inline void macro_lift() {
                     hold_score = false;
                 }
                 if (hold_score && armIn) {
-                    armTarget = 9000;
+                    arm.set_value(true);
                 } else {
-                    armTarget = 0;
+                    arm.set_value(false);
                 }
-                liftTarget = 0;
+                liftTarget = -200;
             } else if (level == 1) {
-                armTarget = 9000;
-                liftTarget = 1900;
+                arm.set_value(true);
+                liftTarget = 26500;
             } else if (level == 2) {
-                armTarget = 9000;
-                liftTarget = 4500;
+                arm.set_value(true);
+                liftTarget = 50000;
             } else if (level == 3) {
-                armTarget = 9000;
-                liftTarget  = 7100;
+                arm.set_value(true);
+                liftTarget = 70000;
             }
-            armError = armTarget - arm_rotation.get_position();
-            liftError = liftTarget - lift_rotation.get_position()/100;
-
-            arm.move(armError * armkP);
+            
+            liftError = liftTarget - lift_rotation.get_position();
             lift.move(liftError * liftkP);
         }
 		pros::delay(20);
@@ -84,9 +79,7 @@ inline void macro_lift() {
 inline void lift_auto() {
     while (true) {
         liftError = liftTarget - lift_rotation.get_position()/100;
-        armError = armTarget - arm_rotation.get_position();
         lift.move(liftError * liftkP);
-        arm.move(armError * armkP);
         pros::delay(20);
     }
 }
@@ -94,10 +87,11 @@ inline void lift_auto() {
 /* scoring command */
 inline void score_stack() {
     if (level != 0) {
+        claw.move(-127);
         pros::delay(200);
-        arm.move((10000 - arm_rotation.get_position()) * 0.03);
+        lift.move_relative(1000, 90);
         pros::delay(1000);
-        armIn = false;
+        lift.move_relative(-1000, 90);
         scoring = false;
     }
 }

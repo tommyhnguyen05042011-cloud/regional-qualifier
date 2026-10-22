@@ -6,6 +6,7 @@
 #include <cstdio>
 #include "main.h"
 #include "pros/llemu.hpp"
+#include "pros/motors.h"
 #include "pros/rtos.hpp"
 
 using namespace pros;
@@ -15,11 +16,12 @@ void initialize() {
 	lcd::initialize();
 
 	// rotation reset
-	arm_rotation.reset_position();
 	lift_rotation.reset_position();
 	// piston state
 	intake_pistion_front.set_value(false);
 	intake_piston_back.set_value(false);
+
+	lift.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 
 	//chassis initilize
 	chassis.calibrate();
@@ -31,7 +33,7 @@ void initialize() {
             lcd::print(1, "Y: %.3f", chassis.getPose().y);
             lcd::print(2, "Theta: %.3f", chassis.getPose().theta);
 
-			lcd::print(3, "Lift Level: %d", level);
+			lcd::print(3, "Lift Rotation: %d", lift_rotation.get_position());
 
 			lcd::print(4, "Left Drive Temp: %d", left_motor_group.get_temperature());
 			lcd::print(5, "Right Drive Temp: %d", right_motor_group.get_temperature());
@@ -43,13 +45,14 @@ void initialize() {
     });
 }
 
-Task auto_lift_task(lift_auto);
-
 void disabled() {}
 
 void competition_initialize() {}
 
 void autonomous() {
+	// start auton lift macro task
+	Task auto_lift_task(lift_auto);
+
 	// toggle
 	chassis.tank(-60, -60);
 	delay(400);
@@ -63,7 +66,7 @@ void autonomous() {
 	// alliance goal 1
 	chassis.moveToPose(-45, -20, 0, 2000, {.forwards = false});
 	liftTarget = 500;
-	armTarget = 9000;
+	arm.set_value(true);
 	chassis.waitUntilDone();
 	chassis.tank(-30, -30); // push into goal
 	liftTarget = -1100;
@@ -78,7 +81,7 @@ void autonomous() {
 	intake.move(127);
 	chassis.moveToPose(-37.7, -14, 83, 2000, {.minSpeed = 70, .earlyExitRange = 4}); // motion chain
 	delay(500);
-	armTarget = 0;
+	arm.set_value(false);
 	liftTarget = 0;
 	chassis.moveToPose(-29.1, -19.7, 137, 1800);
 	chassis.waitUntilDone();
@@ -88,11 +91,11 @@ void autonomous() {
 
 	// stack up
 	liftTarget = 1900;
-	armTarget = 9500;
+	arm.set_value(true);
 	delay(200);
 	intake_piston_back.set_value(false);
 	chassis.moveToPose(-46, -22, 90, 2000, {.forwards = false});
-	armTarget = 9000;
+	arm.set_value(true);
 	chassis.waitUntilDone();
 	chassis.tank(-50, -50);
 	delay(500);
@@ -103,7 +106,7 @@ void autonomous() {
 	chassis.moveToPose(-37.1, -32.9, 188, 1500, {.minSpeed = 70, .earlyExitRange = 4});
 	delay(200);
 	liftTarget = 0;
-	armTarget = 0;
+	arm.set_value(false);
 	chassis.moveToPose(-47, -46.5, 225, 1800);
 	chassis.waitUntilDone();
 	intake_piston_back.set_value(true);
@@ -112,7 +115,7 @@ void autonomous() {
 	intake_piston_back.set_value(false);
 
 	liftTarget = 4500;
-	armTarget = 9000;
+	arm.set_value(true);
 	chassis.turnToPoint(-47, -26, 1500, {.forwards = false});
 	chassis.waitUntilDone();
 	chassis.moveToPose(-47, -26, 180, 2000, {.forwards = false});
@@ -126,12 +129,14 @@ void autonomous() {
 	delay(500);
 	liftTarget = 0;
 	chassis.moveToPose(-3.5, -5.6, 45, 2000);
+
+	// exit auton lift macro task
+	auto_lift_task.remove();
 }
 
 Controller master(E_CONTROLLER_MASTER);
 
 void opcontrol() {
-	auto_lift_task.remove();
 	Task macro_lift_task(macro_lift);
 	Task macro_intake_task(macro_intake);
 	manual = false;
@@ -152,6 +157,15 @@ void opcontrol() {
 			intake.move(0);
 		}
 
+		// claw control
+		if (master.get_digital(E_CONTROLLER_DIGITAL_R1)) {
+			claw.move(127);
+		} else if (master.get_digital(E_CONTROLLER_DIGITAL_R2)) {
+			claw.move(-127);
+		} else {
+			claw.move(0);
+		}
+
 		// intake pneumatics control
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)) {
 			intake1Retract = !intake1Retract;
@@ -170,17 +184,18 @@ void opcontrol() {
 			if (master.get_digital(E_CONTROLLER_DIGITAL_Y)) {
 				lift.move(127);
 			} else if (master.get_digital(E_CONTROLLER_DIGITAL_RIGHT)) {
-				lift.move(-127);
+				lift.move(-100);
 			} else {
 				lift.move(0);
+				lift.brake();
 			}
 			if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)) {
 				armLower = !armLower;
 			}
 			if (armLower) {
-				arm.move((9000 - arm_rotation.get_position()) * 0.01);
+				arm.set_value(false);
 			} else {
-				arm.move((7000 - arm_rotation.get_position()) * 0.01);
+				arm.set_value(true);
 			}
 		} else {
 			if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)) {
