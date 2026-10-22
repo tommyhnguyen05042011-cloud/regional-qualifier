@@ -5,7 +5,7 @@ inline bool hold_score = false; /* determine whether arm should stay
                                    at score or at load*/
 
 inline bool loading = true; /* state of arm, loading (taking stacks from intake, only on lv0)
-                               or scoring (parallel to ground to score)*/
+                               or scoring (parallel to ground)*/
 
 inline bool scoring = false; /* is robot's next scoring system going to score or not
                                 only happens higher than lv0*/
@@ -14,8 +14,7 @@ inline bool manual = false; /* state of control, manual or macroed.
                                when manual, driver will be able
                                to move the lift to whatever degree of movement he needs */
 
-inline bool armIn = true;
-inline bool armLower = true;
+inline bool clawIn = true;
 inline bool intake1Retract = true;
 inline bool intake2Retract = true;
 inline bool currentOpticalDetect = false;

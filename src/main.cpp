@@ -20,7 +20,7 @@ void initialize() {
 	// piston state
 	intake_pistion_front.set_value(false);
 	intake_piston_back.set_value(false);
-	arm.set_value(false);
+	arm.set_value(true);
 
 	lift.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 
@@ -208,22 +208,20 @@ void opcontrol() {
 		// arm control at lv0
 		if (level == 0) {
 			if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)) {
-				armLower = !armLower;
+				loading = !loading;
 			}
-			arm.set_value(armLower); /*in the macro lift, lv0 does not control the arm
+			arm.set_value(loading); /*in the macro lift, lv0 does not control the arm
 									   and this will control it instead*/ 
 		}
 
-		// load & score
+		// score
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) {
-			if (level == 0) {
-				armIn = true;
-			} else {
+			if (level != 0) {
 				scoring = !scoring;
 				if (scoring) {
 					Task scoring_task(score_stack); // only summon scoring task ONCE if scoring is true
 				}
-			}
+			} else {}
 		}
 
 		//reseting lift
