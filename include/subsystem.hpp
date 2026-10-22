@@ -20,7 +20,7 @@ inline lemlib::Drivetrain drivetrain(&left_motor_group, // left motor group
 );
 
 // imu
-inline pros::Imu imu(14);
+inline pros::Imu imu(11);
 
 // vertical tracking wheel
 inline pros::Rotation vertical_encoder(1);
@@ -66,12 +66,12 @@ inline lemlib::Chassis chassis(drivetrain, // drivetrain settings
 );
 
 inline pros::Motor intake(13);
-inline pros::MotorGroup lift({-11, 12});
-inline pros::Motor claw(-15);
+inline pros::MotorGroup lift({-16, 12});
+inline pros::Motor claw(-14);
 
-inline pros::Rotation lift_rotation(17);
+inline pros::Rotation lift_rotation(15);
 inline pros::Optical optical(8);
 
 inline pros::ADIDigitalOut intake_pistion_front('A');
 inline pros::ADIDigitalOut intake_piston_back('B');
-inline pros::ADIDigitalOut arm('C');
+inline pros::ADIDigitalOut arm('H');
