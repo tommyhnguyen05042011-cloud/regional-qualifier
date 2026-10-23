@@ -35,8 +35,7 @@ inline void macro_intake() {
         } else if (!currentOpticalDetect) {
             intake2Retract = true;
         }
-        
-        intake_piston_back.set_value(!intake2Retract);
+
         lastOpticalDetect = currentOpticalDetect;
         pros::delay(20);
     }
