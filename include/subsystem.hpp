@@ -72,6 +72,6 @@ inline pros::Motor claw(-14);
 inline pros::Rotation lift_rotation(15);
 inline pros::Optical optical(8);
 
-inline pros::ADIDigitalOut intake_pistion_front('A');
+inline pros::ADIDigitalOut intake_piston_front('A');
 inline pros::ADIDigitalOut intake_piston_back('B');
 inline pros::ADIDigitalOut arm('H');
