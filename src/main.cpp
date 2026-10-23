@@ -18,7 +18,7 @@ void initialize() {
 	// rotation reset
 	lift_rotation.reset_position();
 	// piston state
-	intake_pistion_front.set_value(false);
+	intake_piston_front.set_value(false);
 	intake_piston_back.set_value(false);
 	arm.set_value(false);
 
@@ -26,7 +26,7 @@ void initialize() {
 
 	//chassis initilize
 	chassis.calibrate();
-	chassis.setPose(-58.85, -6.5, 270, false);
+	chassis.setPose(-58.8, -15.75, 310, false);
 
 	Task([&] {
 		while (true) {
@@ -56,16 +56,66 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-	// start auton lift macro task
+	// start macro tasks
 	Task auto_lift_task(lift_auto);
 
-	
+	intake.move(127);
+
+	// preload to goal
+	claw.move(127);
+	arm.set_value(true);
+	liftTarget = -200;
+	chassis.moveToPoint(-50, -23, 700, {.forwards = false});
+	chassis.waitUntilDone();
+	claw.move(-127);
+	delay(200);
+
+	// 1st stack
+	chassis.tank(-90, 60);
+	delay(480);
+	chassis.cancelAllMotions();
+	arm.set_value(false);
+
+	chassis.moveToPoint(-60, -23.5, 700);
+	chassis.waitUntilDone();
+	claw.move(127);
+	intake_piston_back.set_value(true);
+	delay(1800);
+	arm.set_value(true);
+	liftTarget = 27000;
+	while (liftError > 500) {
+		delay(10);
+	}
+	chassis.moveToPoint(-48, -23.5, 1000, {.forwards = false});
+	chassis.waitUntilDone();
+	chassis.tank(-80, -80);
+	claw.move(-127);
+	delay(300);
+
+	// setup move + roller
+	chassis.cancelAllMotions();
+	chassis.tank(60, -127);
+	delay(1000);
+	chassis.tank(60, 60);
+	delay(300);
+	chassis.cancelAllMotions();
+	chassis.turnToHeading(270, 500);
+	chassis.waitUntilDone();
+	liftTarget = -200;
+	arm.set_value(false);
+	chassis.moveToPose(-80, -5, 270, 800);
+	chassis.waitUntilDone();
+	chassis.moveToPoint(-60, -5, 800, {.forwards = false});
+	chassis.waitUntilDone();
+	chassis.moveToPoint(-75, -5, 800);
+	chassis.waitUntilDone();
+	chassis.moveToPoint(-60, -5, 500);
+	chassis.waitUntilDone();
 }
 
 Controller master(E_CONTROLLER_MASTER);
 
 void opcontrol() {
-
 	Task macro_lift_task(macro_lift);
 	Task macro_intake_task(macro_intake);
 	manual = false;
@@ -92,7 +142,7 @@ void opcontrol() {
 			intake1Retract = !intake1Retract;
 			intake2Retract = !intake2Retract;
 		}
-		intake_pistion_front.set_value(!intake1Retract); //flip both variable bc our pistons are flipped
+		intake_piston_front.set_value(!intake1Retract);
 		intake_piston_back.set_value(!intake2Retract);
 
 		// claw control
