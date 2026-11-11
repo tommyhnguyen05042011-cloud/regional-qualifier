@@ -24,21 +24,17 @@ inline void macro_lift() {
             if (level == 0) {
                 liftTarget = -200;
             } else if (level == 1) {
-                liftTarget = 26000;
+                liftTarget = 27000;
             } else if (level == 2) {
-                liftTarget = 47000;
+                liftTarget = 48000;
             } else if (level == 3) {
-                liftTarget = 72000;
+                liftTarget = 73000;
             } else if (level == 4) {
-                liftTarget = 94000;
+                liftTarget = 96000;
             }
             
             liftError = liftTarget - lift_rotation.get_position();
-            if (liftError * liftkP < -80) {
-                lift.move(-80);
-            } else {
-                lift.move(liftError * liftkP);
-            }
+            lift.move(liftError * liftkP);
         }
 		pros::delay(20);
 	}
