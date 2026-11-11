@@ -17,10 +17,6 @@ void initialize() {
 	loading = true;
 	// rotation reset
 	lift_rotation.reset_position();
-	// piston state
-	intake_piston_front.set_value(false);
-	intake_piston_back.set_value(false);
-	arm.set_value(false);
 
 	lift.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 
@@ -58,66 +54,11 @@ void competition_initialize() {}
 void autonomous() {
 	// start macro tasks
 	Task auto_lift_task(lift_auto);
-
-	intake.move(127);
-
-	// preload to goal
-	claw.move(127);
-	arm.set_value(true);
-	liftTarget = -200;
-	chassis.moveToPoint(-50, -23, 700, {.forwards = false});
-	chassis.waitUntilDone();
-	claw.move(-127);
-	delay(200);
-
-	// 1st stack
-	chassis.tank(-90, 60);
-	delay(480);
-	chassis.cancelAllMotions();
-	arm.set_value(false);
-
-	chassis.moveToPoint(-60, -23.5, 700);
-	chassis.waitUntilDone();
-	claw.move(127);
-	intake_piston_back.set_value(true);
-	delay(1800);
-	arm.set_value(true);
-	liftTarget = 27000;
-	while (liftError > 500) {
-		delay(10);
-	}
-	chassis.moveToPoint(-48, -23.5, 1000, {.forwards = false});
-	chassis.waitUntilDone();
-	chassis.tank(-80, -80);
-	claw.move(-127);
-	delay(300);
-
-	// setup move + roller
-	chassis.cancelAllMotions();
-	chassis.tank(60, -127);
-	delay(1000);
-	chassis.tank(60, 60);
-	delay(300);
-	chassis.cancelAllMotions();
-	chassis.turnToHeading(270, 500);
-	chassis.waitUntilDone();
-	liftTarget = -200;
-	arm.set_value(false);
-	chassis.moveToPose(-80, -5, 270, 800);
-	chassis.waitUntilDone();
-	chassis.moveToPoint(-60, -5, 800, {.forwards = false});
-	chassis.waitUntilDone();
-	chassis.moveToPoint(-75, -5, 800);
-	chassis.waitUntilDone();
-	chassis.moveToPoint(-60, -5, 500);
-	chassis.waitUntilDone();
 }
-
-Controller master(E_CONTROLLER_MASTER);
 
 void opcontrol() {
 	Task macro_lift_task(macro_lift);
-	Task macro_intake_task(macro_intake);
+	// Task macro_toggle_task(macro_toggle);
 	manual = false;
 
 	while (true) {
@@ -130,20 +71,33 @@ void opcontrol() {
 
 		// intake control
 		if (master.get_digital(E_CONTROLLER_DIGITAL_L1)) {
-			intake.move(127);
+			if (flipperState) {
+			} else {
+				intake.move(127);
+			}
 		} else if (master.get_digital(E_CONTROLLER_DIGITAL_L2)) {
 			intake.move(-127);
 		} else {
 			intake.move(0);
 		}
 
-		// intake pneumatics control
+		// flipper control
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)) {
-			intake1Retract = !intake1Retract;
-			intake2Retract = !intake2Retract;
+			if (manual) {
+				if (lift_rotation.get_position() < 28500) {
+					flipperState = false;
+				} else {  
+					flipperState = !flipperState;
+				}
+			} else if (!manual) {
+				if (level == 0) {
+					flipperState = false;
+				} else {
+					flipperState = !flipperState;
+				}
+			}
 		}
-		intake_piston_front.set_value(!intake1Retract);
-		intake_piston_back.set_value(!intake2Retract);
+		flipper.set_value(flipperState);
 
 		// claw control
 		if (master.get_digital(E_CONTROLLER_DIGITAL_R1)) {
@@ -186,8 +140,6 @@ void opcontrol() {
 			if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)) {
 				loading = !loading;
 			}
-			arm.set_value(!loading); /*in the macro lift, lv0 does not control the arm
-									   and this will control it instead*/ 
 		}
 
 		//reseting lift
