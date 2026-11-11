@@ -1,8 +1,7 @@
+#include "pros/misc.h"
 #include "subsystem.hpp"
 
 inline int level = 0; /* keeps track of lift's current level */
-inline bool hold_score = false; /* determine whether arm should stay
-                                   at score or at load*/
 
 inline bool loading = true; /* state of arm, loading (taking stacks from intake, only on lv0)
                                or scoring (parallel to ground)*/
@@ -14,32 +13,10 @@ inline bool manual = false; /* state of control, manual or macroed.
                                when manual, driver will be able
                                to move the lift to whatever degree of movement he needs */
 
-inline bool clawIn = true;
-inline bool intake1Retract = true;
-inline bool intake2Retract = true;
-inline bool currentOpticalDetect = false;
-inline bool lastOpticalDetect = false;
+inline bool flipperState = false;
 inline int liftTarget;
 inline int liftError;
 inline float liftkP = 0.02;
-
-inline void macro_intake() {
-    while (true) {
-        currentOpticalDetect = (optical.get_proximity() > 50 && optical.get_proximity() < 255);
-
-        if (!intake1Retract) {
-            intake2Retract = false;
-        } else if (currentOpticalDetect && !lastOpticalDetect) {
-            intake2Retract = false;
-            pros::delay(1500);
-        } else if (!currentOpticalDetect) {
-            intake2Retract = true;
-        }
-
-        lastOpticalDetect = currentOpticalDetect;
-        pros::delay(20);
-    }
-}
 
 inline void macro_lift() {
 	while (true) {
@@ -47,17 +24,12 @@ inline void macro_lift() {
             if (level == 0) {
                 liftTarget = -200;
             } else if (level == 1) {
-                loading = false;
-                arm.set_value(true);
                 liftTarget = 26000;
             } else if (level == 2) {
-                arm.set_value(true);
                 liftTarget = 47000;
             } else if (level == 3) {
-                arm.set_value(true);
                 liftTarget = 72000;
             } else if (level == 4) {
-                arm.set_value(true);
                 liftTarget = 94000;
             }
             
@@ -70,6 +42,19 @@ inline void macro_lift() {
         }
 		pros::delay(20);
 	}
+}
+
+inline void macro_toggle() {
+    while (true) {
+        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+            while (optical.get_hue() > 25) {
+                intake.move(-127);
+            }
+            pros::delay(100);
+            intake.move(0);
+        }
+        pros::delay(20);
+    }
 }
 
 inline void lift_auto() {
