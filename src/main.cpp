@@ -82,19 +82,12 @@ void opcontrol() {
 		}
 
 		// flipper control
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)) {
-			if (manual) {
-				if (lift_rotation.get_position() < 28500) {
-					flipperState = false;
-				} else {  
-					flipperState = !flipperState;
-				}
-			} else if (!manual) {
-				if (level == 0) {
-					flipperState = false;
-				} else {
-					flipperState = !flipperState;
-				}
+		if (lift_rotation.get_position() < 20000 || level == 0) { /*if lift is lower than a certain height/level
+																	then set to retracted position*/
+			flipperState = false;
+		} else {
+			if (master.get_digital(E_CONTROLLER_DIGITAL_A)) { // else can be changed freely
+				flipperState = !flipperState;
 			}
 		}
 		flipper.set_value(flipperState);
